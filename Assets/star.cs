@@ -1,54 +1,48 @@
 using UnityEngine;
 using System.Collections;
-using System.Collections.Generic;
 
 public class star : MonoBehaviour
 {
-    public GameObject square;
     public float speed = 5f;
     private bool isMoving = false;
     private float Dist;
+    public bool start = true;
+    public Transform square;
+
     void Start()
     {
         isMoving = true;
         StartCoroutine(SmoothMoveAndReset());
     }
-    void FixedUpade()
-        {
-            if (Input.GetKeyDown(KeyCode.Alpha3) && !isMoving)
-            {
-                
-            }
-        }
+
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Alpha2))
+        if (Input.GetKeyDown(KeyCode.Alpha2) && square != null)
         {
-            Dist = Vector2.Distance(this.transform.position, square.transform.position);//별과 네모
+            Dist = Vector2.Distance(this.transform.position, square.transform.position);
             Debug.Log(Dist);
         }
-        
-
+        else
+        {
+            
+        }
     }
-    
 
     IEnumerator SmoothMoveAndReset()
     {
         int repeatCount = 0;
         while (repeatCount < 10)
         {
+            start = true;
             Debug.Log("Moving...");
             yield return StartCoroutine(MoveObjectSmoothly(1f));
 
             speed += 3f;
-
-            yield return new WaitForSeconds(0.2f);
-            Debug.Log("Reset");
             repeatCount++;
-            
+
             gameObject.transform.position = new Vector3(-10, -4, -2);
             yield return new WaitForSeconds(1f);
-
+            start = false;
         }
 
         isMoving = false;
