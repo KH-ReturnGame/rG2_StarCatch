@@ -29,10 +29,13 @@ public class End : MonoBehaviour
     void Update()
     {
         // starScript가 null이 아니고, 별 스크립트의 count 값이 9보다 크면
-        if (starScript != null && starScript.count > 9)
+        if (starScript != null && starScript.count > 10)
         {
-            Debug.Log("end");
             transform.position = new Vector3(1, 0, -4); // 이 오브젝트의 위치를 변경합니다.
+        }
+        IEnumerator sexy()
+        {
+            yield return new WaitForSeconds(1f);
         }
     }
 }

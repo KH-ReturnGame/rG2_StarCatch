@@ -1,19 +1,18 @@
 using UnityEngine;
-using UnityEngine.UI;
+using TMPro;
+using UnityEngine.UI; // CanvasScaler를 사용하기 위해 추가
+using System.Collections; // 코루틴 사용을 위해 추가
 
 public class text_stript : MonoBehaviour
 {
     public GameObject star1;
-    public Text TotalText; // Inspector에서 할당하거나, Start()에서 GetComponent로 찾음
-    public bool theend = true;
+    public TMP_Text TotalText;
+    private float starcount = 0f; // star 스크립트의 count 값을 저장할 변수
     public float score;
     private RectTransform textRectTransform;
     private CanvasScaler canvasScaler;
-    private Vector2 originalAnchorMin;
-    private Vector2 originalAnchorMax;
-    private Vector2 originalPivot;
-    private Vector2 originalAnchoredPosition;
-    private int originalFontSize;
+    private Vector2 originalPosition; // 텍스트의 원래 위치 저장
+    private bool textHidden = false; // 글자가 숨겨졌는지 여부 추적
 
     void Start()
     {
@@ -25,43 +24,43 @@ public class text_stript : MonoBehaviour
             return;
         }
 
-        // 스크립트가 UI Text GameObject에 붙어있다면 GetComponent<Text>() 사용
-        TotalText = GetComponent<Text>();
+        TotalText = GetComponent<TMP_Text>();
         if (TotalText == null)
         {
-            Debug.LogError("This script needs to be attached to a GameObject with a UI Text component.");
+            Debug.LogError("This script needs to be attached to a GameObject with a UI TextMeshPro component.");
             enabled = false;
             return;
         }
 
-        // Text 컴포넌트가 속한 RectTransform 가져오기
         textRectTransform = TotalText.GetComponent<RectTransform>();
         if (textRectTransform == null)
         {
-            Debug.LogError("UI Text GameObject must have a RectTransform component.");
+            Debug.LogError("UI TextMeshPro GameObject must have a RectTransform component.");
             enabled = false;
             return;
         }
 
-        // CanvasScaler 컴포넌트 찾기 (화면 중앙 계산에 필요)
         Canvas canvas = GetComponentInParent<Canvas>();
         if (canvas != null)
         {
             canvasScaler = canvas.GetComponent<CanvasScaler>();
+            if (canvasScaler.uiScaleMode != CanvasScaler.ScaleMode.ScaleWithScreenSize)
+            {
+                Debug.LogWarning("Canvas Scale Mode is not set to 'Scale With Screen Size'. Centering might not be accurate on different resolutions.");
+            }
         }
         else
         {
-            Debug.LogError("UI Text GameObject must be a child of a Canvas.");
+            Debug.LogError("UI TextMeshPro GameObject must be a child of a Canvas.");
             enabled = false;
             return;
         }
 
-        // 초기 위치 및 앵커 정보 저장
-        originalAnchorMin = textRectTransform.anchorMin;
-        originalAnchorMax = textRectTransform.anchorMax;
-        originalPivot = textRectTransform.pivot;
-        originalAnchoredPosition = textRectTransform.anchoredPosition;
-        originalFontSize = TotalText.fontSize;
+        if (TotalText != null)
+        {
+            TotalText.color = Color.white;
+            originalPosition = textRectTransform.anchoredPosition; // 시작 시 원래 위치 저장
+        }
     }
 
     void Update()
@@ -71,21 +70,29 @@ public class text_stript : MonoBehaviour
             star starComponent = star1.GetComponent<star>();
             if (starComponent != null)
             {
-                theend = starComponent.isMoving;
+                starcount = starComponent.count;
                 score = starComponent.total;
 
-                if (theend == true)
+                if (starcount < 11)
                 {
-                    TotalText.text = "현재 점수:" + score.ToString();
-
+                    TotalText.text = "SCORE:" + score.ToString();
+                    TotalText.color = Color.white; // count가 10보다 작을 때는 흰색 유지
+                    textHidden = false; // 다시 보이도록 설정
                 }
                 else
                 {
-                    TotalText.text = "최종 점수: " + score.ToString();
-                    TotalText.fontSize = 60; // 글자 크기를 60으로 키움
-                    //여기에 입력
-                    textRectTransform.anchoredPosition = new Vector3(0, 0, 3f);
-                    Debug.Log("dasdsad");
+                    StartCoroutine ("HideTextAfterDelay");
+                    TotalText.text = "TOTAL SCORE: " + score.ToString();
+                    TotalText.color = Color.black; // count가 10보다 크면 검은색으로 변경
+                    textRectTransform.anchorMin = new Vector2(0.5f, 0.5f);
+                    textRectTransform.anchorMax = new Vector2(0.5f, 0.5f);
+                    textRectTransform.pivot = new Vector2(0.5f, 0.5f);
+                    textRectTransform.anchoredPosition = Vector2.zero;
+
+                    if (!textHidden)
+                    {
+                        textHidden = true;
+                    }
                 }
             }
             else
@@ -94,5 +101,10 @@ public class text_stript : MonoBehaviour
                 enabled = false;
             }
         }
+    }
+
+    IEnumerator HideTextAfterDelay()
+    {
+        yield return new WaitForSeconds(1f);
     }
 }

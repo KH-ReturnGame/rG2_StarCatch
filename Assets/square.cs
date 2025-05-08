@@ -41,18 +41,13 @@ public class RandomGradientChanger : MonoBehaviour
             float randomFloat = Random.Range(-6.0f, 9.0f);
             transform.position = new Vector3(randomFloat, -4, -1);
             StartCoroutine("se");
-
-            if (gradientMaterial != null)
-            {
-                gradientMaterial.color = new Color(Random.value, Random.value, Random.value);
-            }
         }
         starScript.start = false;
         
     }
     IEnumerator se()
     {    
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSeconds(22f);
         starScript.start = true;
     }
 }
